@@ -60,12 +60,12 @@ CERT=$(< "${cert_file}" base64 -w 0)
 P12=$(< "${p12_file}" base64 -w 0)
 printf 'H|%s|%s|%s|%s|%s\n' "$PUBLIC_KEY" "$PRIVATE_KEY" "$CERT" "$CA_CHAIN" "$P12"
 
-# Host key and certificate
+# Client key and certificate
 openssl req -new -sha256 -batch -out "${csr_file}" -newkey "rsa:${CLIENT_KEY_STRENGTH}" -keyout "${key_file}" -passout "pass:${PASSWORD}" -subj "${CLIENT_SUBJECT}"
 openssl ca -notext -md sha256 -batch -in "${csr_file}" -config "${INTERMEDIATE_CONFIG_FILE}" -passin "pass:${INTERMEDIATE_PASS}" -extensions "usr_cert" -days "${CLIENT_VALID_DAYS}" -out "${cert_file}"
-openssl pkcs12 -passin "pass:${PASSWORD}" -passout pass:serverpass -export -in "${cert_file}" -inkey "${key_file}" -chain -CAfile "${ca_file}" -name "Client" -out "${p12_file}"
+openssl pkcs12 -passin "pass:${PASSWORD}" -passout pass:clientpass -export -in "${cert_file}" -inkey "${key_file}" -chain -CAfile "${ca_file}" -name "Client" -out "${p12_file}"
 PUBLIC_KEY=$(openssl x509 -pubkey -noout -in "${cert_file}" | base64 -w 0)
 PRIVATE_KEY=$(< "$key_file" base64 -w 0)
 CERT=$(< "${cert_file}" base64 -w 0)
 P12=$(< "${p12_file}" base64 -w 0)
-printf 'H|%s|%s|%s|%s|%s\n' "$PUBLIC_KEY" "$PRIVATE_KEY" "$CERT" "$CA_CHAIN" "$P12"
+printf 'C|%s|%s|%s|%s|%s\n' "$PUBLIC_KEY" "$PRIVATE_KEY" "$CERT" "$CA_CHAIN" "$P12"
